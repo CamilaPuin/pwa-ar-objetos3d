@@ -1,0 +1,14 @@
+{
+  "id": "modelo-demo-2",
+  "tipo": "ficha-de-texto",
+  "aviso": "Ficha de texto de prueba: el modelo 3D real (.glb) todavía no existe.",
+  "nombre": "Arquitectura en capas",
+  "resumen": "Organiza el sistema en niveles apilados (presentación, lógica de negocio, datos) donde cada capa solo habla con la inmediatamente inferior.",
+  "componentes": [
+    "Presentación",
+    "Lógica de negocio",
+    "Acceso a datos"
+  ],
+  "cuando_usarlo": "Sistemas empresariales con equipos separados por especialidad.",
+  "riesgo": "Si toda petición atraviesa todas las capas sin aportar nada en las intermedias, se añade latencia y código de paso."
+}

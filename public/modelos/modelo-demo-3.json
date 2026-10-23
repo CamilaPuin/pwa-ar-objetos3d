@@ -1,0 +1,14 @@
+{
+  "id": "modelo-demo-3",
+  "tipo": "ficha-de-texto",
+  "aviso": "Ficha de texto de prueba: el modelo 3D real (.glb) todavía no existe.",
+  "nombre": "Microservicios",
+  "resumen": "Divide el sistema en servicios pequeños, desplegables por separado, que se comunican por red y cada uno posee sus datos.",
+  "componentes": [
+    "Servicio",
+    "Puerta de entrada (API gateway)",
+    "Mensajería o llamadas HTTP"
+  ],
+  "cuando_usarlo": "Equipos grandes que necesitan desplegar partes del sistema de forma independiente.",
+  "riesgo": "Cada llamada es una llamada de red: aparecen fallos parciales, latencia y la complejidad de operar muchos servicios."
+}

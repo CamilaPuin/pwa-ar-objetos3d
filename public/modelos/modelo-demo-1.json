@@ -1,0 +1,14 @@
+{
+  "id": "modelo-demo-1",
+  "tipo": "ficha-de-texto",
+  "aviso": "Ficha de texto de prueba: el modelo 3D real (.glb) todavía no existe.",
+  "nombre": "Patrón MVC",
+  "resumen": "Separa la aplicación en tres responsabilidades: Modelo (datos y reglas), Vista (lo que se ve) y Controlador (recibe la acción del usuario y coordina).",
+  "componentes": [
+    "Modelo",
+    "Vista",
+    "Controlador"
+  ],
+  "cuando_usarlo": "Interfaces con varias vistas del mismo dato; facilita probar la lógica sin la pantalla.",
+  "riesgo": "En proyectos pequeños el controlador puede crecer hasta convertirse en un archivo que lo hace todo."
+}

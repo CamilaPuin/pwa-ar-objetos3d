@@ -1,0 +1,38 @@
+Atlas 3D de Arquitectura de Software — checkpoint al cierre de la Sesión 37
+Electiva - PWA · UPTC (Sub-bloque B)
+
+Qué es esto
+-----------
+El Atlas 3D con SERVICE WORKER PROPIO (src/sw.ts), avisos (notificaciones
+locales) y descarga de fichas de modelos en segundo plano (Background Sync).
+
+Novedades de la Sesión 37
+--------------------------
+  src/sw.ts          Service Worker escrito a mano (InjectManifest): precaché,
+                     rutas, evento sync (descargas) y notificationclick
+  src/descargas.ts   cola de descargas — la comparten el SW y la página
+  src/avisos.ts      permiso y notificaciones locales
+  src/db.ts          versión 2: almacén "descargas" (migración por tramos)
+  public/modelos/    fichas de TEXTO de prueba (no son modelos 3D)
+  vite.config.ts     strategies: "injectManifest" + globIgnores: ["modelos/**"]
+  tsconfig.sw.json   comprueba los tipos del SW con la librería "WebWorker"
+
+Cómo probarlo
+--------------
+  npm install
+  npm run build        (el build compila también src/sw.ts)
+  npm run preview      → http://localhost:4173
+  1. «Activar avisos» (el permiso se pide en el clic).
+  2. «Descargar fichas…»: barra de progreso 0→3 y tarjetas «disponible sin
+     conexión». DevTools → Application → Background Sync permite disparar
+     el evento a mano.
+  3. Apaga el servidor (Ctrl+C), recarga: la app y las fichas siguen ahí.
+
+Limitaciones honestas
+----------------------
+  - Es notificación LOCAL: no hay push desde un servidor (el Atlas no tiene
+    servidor; el push se vio en la Sesión 26 con el Gestor).
+  - Background Sync no existe en Safari ni Firefox: hay plan B desde la página.
+  - Las fichas son texto de prueba; el catálogo 3D real viene después.
+
+UPTC · Facultad de Ingeniería · Electiva - PWA

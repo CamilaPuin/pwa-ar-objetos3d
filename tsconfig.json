@@ -1,15 +1,24 @@
 {
-  "name": "Atlas 3D de Arquitectura de Software",
-  "short_name": "Atlas 3D",
-  "description": "Catálogo interactivo en 3D de patrones y arquitecturas de software, con soporte de realidad aumentada.",
-  "start_url": "/",
-  "scope": "/",
-  "display": "standalone",
-  "background_color": "#0b1220",
-  "theme_color": "#0b1220",
-  "icons": [
-    { "src": "/iconos/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/iconos/icon-512.png", "sizes": "512x512", "type": "image/png" },
-    { "src": "/iconos/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
-  ]
+  "compilerOptions": {
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    /* Linting */
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"],
+  "exclude": ["src/sw.ts"]
 }

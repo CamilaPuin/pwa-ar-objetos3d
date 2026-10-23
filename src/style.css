@@ -1,0 +1,156 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color-scheme: dark;
+  color: #e8e2cf;
+  background-color: #0b1220;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column; /* Sesión 35: visor arriba, demo de progreso debajo */
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+}
+
+.arranque {
+  max-width: 32em;
+  padding: 2em;
+  text-align: center;
+}
+
+.arranque h1 {
+  font-size: 1.6em;
+  margin-bottom: 0.4em;
+}
+
+.arranque p {
+  color: #9a9a8c;
+}
+
+.atlas-demo {
+  max-width: 48em;
+  padding: 2em;
+}
+
+.atlas-demo h1 {
+  font-size: 1.5em;
+  margin-bottom: 0.2em;
+  text-align: center;
+}
+
+.aviso-demo {
+  color: #d9a441;
+  font-size: 0.85em;
+  text-align: center;
+  margin-bottom: 1.4em;
+}
+
+.modelos-grid {
+  display: grid;
+  gap: 1em;
+}
+
+.modelo-card {
+  border: 1px solid #27334a;
+  border-radius: 10px;
+  padding: 1em 1.2em;
+  background: #101a2c;
+}
+
+.modelo-card h2 {
+  font-size: 1em;
+  margin: 0 0 0.3em;
+}
+
+.modelo-card .meta {
+  color: #9a9a8c;
+  font-size: 0.8em;
+  margin: 0 0 0.6em;
+}
+
+.acciones {
+  display: flex;
+  gap: 0.5em;
+  flex-wrap: wrap;
+  margin-bottom: 0.6em;
+}
+
+.acciones button {
+  background: #1c2b45;
+  color: #e8e2cf;
+  border: 1px solid #27334a;
+  border-radius: 6px;
+  padding: 0.4em 0.7em;
+  font-size: 0.82em;
+  cursor: pointer;
+}
+
+.acciones button:hover {
+  background: #27334a;
+}
+
+.nota-zona {
+  display: flex;
+  gap: 0.4em;
+  flex-wrap: wrap;
+}
+
+.nota-input {
+  flex: 1 1 auto;
+  min-width: 10em;
+  padding: 0.4em 0.6em;
+  border: 1px solid #27334a;
+  border-radius: 6px;
+  background: #0b1220;
+  color: #e8e2cf;
+  font-size: 0.82em;
+}
+
+.nota-zona button {
+  background: none;
+  border: 1px solid #27334a;
+  border-radius: 6px;
+  padding: 0.4em 0.6em;
+  font-size: 0.78em;
+  color: #e8e2cf;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.nota-zona button:hover:not(:disabled) {
+  background: #1c2b45;
+}
+
+.nota-zona button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Sesión 35: visor 3D y controles de sensores */
+.visor-zona { max-width: 40em; margin: 1.2em auto 0; padding: 0 1em; }
+.visor { position: relative; width: 100%; border-radius: 12px; overflow: hidden; border: 1px solid #2a3550; background: #0b1220; }
+.visor canvas { position: relative; z-index: 1; display: block; width: 100%; touch-action: none; }
+.fondo-camara { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.fondo-camara[hidden] { display: none; }
+.visor-barra { display: flex; flex-wrap: wrap; gap: .5em; align-items: center; margin-bottom: .6em; }
+.visor-barra button { background: #162038; color: #e8e2cf; border: 1px solid #2a3550; border-radius: 8px; padding: .45em .8em; cursor: pointer; }
+.visor-barra button:disabled { opacity: .45; cursor: not-allowed; }
+.lectura-visor { font-size: .8em; color: #9fb0d0; font-variant-numeric: tabular-nums; }
+.aviso-visor { background: #3a2f10; border: 1px solid #b8860b; border-radius: 8px; padding: .5em .8em; font-size: .85em; }
+#app { width: 100%; }
+.visor-zona { width: 100%; box-sizing: border-box; }
+
+/* Sesión 37: avisos y descargas para uso sin conexión */
+.descargas-zona { width: 100%; max-width: 48em; padding: 0 2em; box-sizing: border-box; }
+.descargas-zona h2 { font-size: 1.1em; margin: 1em 0 .5em; }
+.descargas-barra { display: flex; flex-wrap: wrap; gap: .5em; align-items: center; }
+.descargas-barra button { background: #162033; color: #e8e2cf; border: 1px solid #2c3a55; border-radius: 8px; padding: .45em .8em; cursor: pointer; font-size: .85em; }
+.descargas-barra button:disabled { opacity: .45; cursor: not-allowed; }
+.estado-avisos, .estado-descarga { font-size: .8em; color: #9a9a8c; }
+.estado-descarga { margin: .4em 0 0; min-height: 1.2em; }
+#progreso-descarga { width: 100%; margin-top: .6em; }
+.modelo-card.destacada { outline: 2px solid #ffcc29; }
+.modelo-card .disponible { color: #7fd18b; }
