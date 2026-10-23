@@ -16,6 +16,7 @@ import { pedirPermisoOrientacion, hayOrientacionReal, iniciarControlOrientacion 
 import type { ControlOrientacion } from "./sensores";
 import { estadoAvisos, pedirPermisoAvisos, mostrarAviso } from "./avisos";
 import { ETIQUETA_SYNC, descargarPendientes } from "./descargas";
+import { diagnosticarAR, mensajeSoporteAR, pedirSesionAR, describirErrorAR } from "./xr";
 import { iniciarCamaraDeFondo, detenerCamaraDeFondo, describirErrorCamara } from "./camara";
 
 // Punto de entrada del proyecto. El andamiaje de Vite + TypeScript + Three.js
@@ -352,4 +353,60 @@ registerSW({
   onRegisterError(error) {
     console.error("Error al registrar el SW de Workbox:", error);
   },
+});
+
+const diagAR = document.querySelector<HTMLElement>("#diag-ar")!;
+const detallesAR = document.querySelector<HTMLDetailsElement>(".diag-ar")!;
+const btnRecomprobar = document.querySelector<HTMLButtonElement>("#btn-recomprobar")!;
+const estadoAR = document.querySelector<HTMLElement>("#estado-ar")!;
+let sesionAR: XRSession | null = null;
+const btnAR = document.querySelector<HTMLButtonElement>("#btn-ar")!;
+const overlayAR = document.querySelector<HTMLElement>("#xr-overlay")!;
+const btnSalirAR = document.querySelector<HTMLButtonElement>("#btn-salir-ar")!;
+
+// ¿Se puede? El botón solo se habilita si la respuesta es «sí». Se pregunta al
+// cargar, al pulsar «Comprobar de nuevo» y cuando el navegador avisa de que
+// cambió el dispositivo XR (así funciona también si activas el emulador después).
+async function comprobarAR(): Promise<void> {
+  const { estado, lineas } = await diagnosticarAR();
+  estadoAR.textContent = mensajeSoporteAR(estado);
+  diagAR.textContent = lineas.join("\n");
+  if (!sesionAR) btnAR.disabled = estado !== "disponible";
+  // Si no se puede, el diagnóstico se muestra abierto para ver qué comprobación falló.
+  detallesAR.open = estado !== "disponible";
+}
+void comprobarAR();
+btnRecomprobar.addEventListener("click", () => void comprobarAR());
+navigator.xr?.addEventListener("devicechange", () => void comprobarAR());
+
+btnAR.addEventListener("click", async () => {
+  avisarVisor("");
+  // La cámara del navegador y la sesión AR no pueden usarse a la vez: la AR
+  // abre la cámara por su cuenta. Se apagan también los sensores de la Sesión 35.
+  apagarCamara();
+  apagarSensores();
+  try {
+    // La petición ocurre DENTRO del clic: es el «gesto del usuario» que exige WebXR.
+    const sesion = await pedirSesionAR(overlayAR);
+    sesionAR = sesion;
+    btnAR.disabled = true;
+    await visor.entrarEnAR(sesion, () => {
+      sesionAR = null;
+      btnAR.disabled = false;
+      estadoAR.textContent = "La sesión de realidad aumentada terminó.";
+    });
+    // domOverlayState existe solo si el navegador concedió la función «dom-overlay».
+    estadoAR.textContent = sesion.domOverlayState
+      ? "Sesión de realidad aumentada activa. Usa «Salir de AR» sobre la cámara."
+      : "Sesión de realidad aumentada activa. Este navegador no mostró el botón sobre la cámara: sal con el gesto de salida del sistema.";
+  } catch (err) {
+    sesionAR?.end().catch(() => {});
+    sesionAR = null;
+    btnAR.disabled = false;
+    avisarVisor(describirErrorAR(err));
+  }
+});
+
+btnSalirAR.addEventListener("click", () => {
+  void sesionAR?.end();
 });
