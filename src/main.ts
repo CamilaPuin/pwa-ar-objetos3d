@@ -17,6 +17,7 @@ import type { ControlOrientacion } from "./sensores";
 import { estadoAvisos, pedirPermisoAvisos, mostrarAviso } from "./avisos";
 import { ETIQUETA_SYNC, descargarPendientes } from "./descargas";
 import { diagnosticarAR, mensajeSoporteAR, pedirSesionAR, describirErrorAR } from "./xr";
+import type { EstadoAR } from "./visor";
 import { iniciarCamaraDeFondo, detenerCamaraDeFondo, describirErrorCamara } from "./camara";
 
 // Punto de entrada del proyecto. El andamiaje de Vite + TypeScript + Three.js
@@ -362,7 +363,73 @@ const estadoAR = document.querySelector<HTMLElement>("#estado-ar")!;
 let sesionAR: XRSession | null = null;
 const btnAR = document.querySelector<HTMLButtonElement>("#btn-ar")!;
 const overlayAR = document.querySelector<HTMLElement>("#xr-overlay")!;
+const xrEstado = document.querySelector<HTMLElement>("#xr-estado")!;
+const xrDatos = document.querySelector<HTMLElement>("#xr-datos")!;
 const btnSalirAR = document.querySelector<HTMLButtonElement>("#btn-salir-ar")!;
+const btnQuitarCubo = document.querySelector<HTMLButtonElement>("#btn-quitar-cubo")!;
+
+function ayudaAR(e: EstadoAR): string {
+  if (!e.hitTest) {
+    return "Este dispositivo no ofrece hit-test: el cubo está a 1,5 m delante. Toca la pantalla para traerlo delante de ti.";
+  }
+  switch (e.fase) {
+    case "buscando":
+      return e.sinSuperficie
+        ? "No encuentro superficies horizontales. Prueba con una zona con textura y buena luz, o toca para colocar el cubo delante de ti."
+        : "Mueve el teléfono despacio hasta ver el anillo verde sobre una superficie horizontal. El naranja indica una superficie no válida.";
+    case "listo":
+      return "Toca la pantalla para colocar el cubo en la superficie horizontal.";
+    case "colocado":
+      return e.overlay
+        ? "Arrastra para moverlo, gira con dos dedos y pellizca para cambiar el tamaño. Toca otra superficie para recolocarlo."
+        : "Cubo colocado. Toca otra superficie para recolocarlo.";
+  }
+}
+
+const INTERVALO_OVERLAY_MS = 200;
+let ultimoPintado = 0;
+let pendienteAR: EstadoAR | null = null;
+let temporizadorAR = 0;
+
+function pintarEstadoAR(e: EstadoAR): void {
+  const si = (valor: boolean) => (valor ? "sí" : "no");
+  const { x, y, z } = e.posicion;
+  const posicion = e.fase === "colocado" ? `(${x.toFixed(2)}, ${y.toFixed(2)}, ${z.toFixed(2)}) m` : "—";
+  const ayuda = ayudaAR(e);
+  const datos =
+    `hit-test: ${si(e.hitTest)} · anclas: ${si(e.anclas)} · anclado: ${si(e.anclado)} · ` +
+    `overlay: ${si(e.overlay)} · fase: ${e.fase} · escala: ${e.escala.toFixed(2)} · ` +
+    `giro: ${e.giroGrados}° · pos: ${posicion} · consultas: ${e.consultas} · ` +
+    `resultados: ${e.resultados} · poses: ${e.impactos}`;
+  if (xrEstado.textContent !== ayuda) xrEstado.textContent = ayuda;
+  if (xrDatos.textContent !== datos) xrDatos.textContent = datos;
+  btnQuitarCubo.hidden = e.fase !== "colocado";
+
+  const faltantes: string[] = [];
+  if (!e.overlay) faltantes.push("dom-overlay");
+  if (!e.hitTest) faltantes.push("hit-test");
+  if (!e.anclas) faltantes.push("anchors");
+  const estado = faltantes.length
+    ? `Sesión AR activa. El navegador no concedió: ${faltantes.join(", ")}.`
+    : "Sesión AR activa. Busca una superficie horizontal.";
+  if (estadoAR.textContent !== estado) estadoAR.textContent = estado;
+}
+
+function mostrarEstadoAR(e: EstadoAR): void {
+  if (performance.now() - ultimoPintado >= INTERVALO_OVERLAY_MS) {
+    ultimoPintado = performance.now();
+    pintarEstadoAR(e);
+    return;
+  }
+  pendienteAR = e;
+  if (temporizadorAR) return;
+  temporizadorAR = window.setTimeout(() => {
+    temporizadorAR = 0;
+    ultimoPintado = performance.now();
+    if (pendienteAR) pintarEstadoAR(pendienteAR);
+    pendienteAR = null;
+  }, INTERVALO_OVERLAY_MS);
+}
 
 // ¿Se puede? El botón solo se habilita si la respuesta es «sí». Se pregunta al
 // cargar, al pulsar «Comprobar de nuevo» y cuando el navegador avisa de que
@@ -381,6 +448,8 @@ navigator.xr?.addEventListener("devicechange", () => void comprobarAR());
 
 btnAR.addEventListener("click", async () => {
   avisarVisor("");
+  btnAR.disabled = true;
+  overlayAR.hidden = false;
   // La cámara del navegador y la sesión AR no pueden usarse a la vez: la AR
   // abre la cámara por su cuenta. Se apagan también los sensores de la Sesión 35.
   apagarCamara();
@@ -389,24 +458,33 @@ btnAR.addEventListener("click", async () => {
     // La petición ocurre DENTRO del clic: es el «gesto del usuario» que exige WebXR.
     const sesion = await pedirSesionAR(overlayAR);
     sesionAR = sesion;
-    btnAR.disabled = true;
-    await visor.entrarEnAR(sesion, () => {
-      sesionAR = null;
-      btnAR.disabled = false;
-      estadoAR.textContent = "La sesión de realidad aumentada terminó.";
+    if (!sesion.domOverlayState) overlayAR.hidden = true;
+    await visor.entrarEnAR(sesion, {
+      overlay: overlayAR,
+      alCambiar: mostrarEstadoAR,
+      alTerminar: () => {
+        if (temporizadorAR) window.clearTimeout(temporizadorAR);
+        temporizadorAR = 0;
+        pendienteAR = null;
+        sesionAR = null;
+        btnAR.disabled = false;
+        overlayAR.hidden = true;
+        btnQuitarCubo.hidden = true;
+        estadoAR.textContent = "La sesión de realidad aumentada terminó.";
+      },
     });
-    // domOverlayState existe solo si el navegador concedió la función «dom-overlay».
-    estadoAR.textContent = sesion.domOverlayState
-      ? "Sesión de realidad aumentada activa. Usa «Salir de AR» sobre la cámara."
-      : "Sesión de realidad aumentada activa. Este navegador no mostró el botón sobre la cámara: sal con el gesto de salida del sistema.";
   } catch (err) {
-    sesionAR?.end().catch(() => {});
+    if (sesionAR) void sesionAR.end().catch((error) => console.error("No se pudo cerrar la sesión AR:", error));
     sesionAR = null;
     btnAR.disabled = false;
+    overlayAR.hidden = true;
     avisarVisor(describirErrorAR(err));
   }
 });
 
+btnSalirAR.addEventListener("beforexrselect", (event) => event.preventDefault());
+btnQuitarCubo.addEventListener("beforexrselect", (event) => event.preventDefault());
 btnSalirAR.addEventListener("click", () => {
   void sesionAR?.end();
 });
+btnQuitarCubo.addEventListener("click", () => visor.quitarCubo());

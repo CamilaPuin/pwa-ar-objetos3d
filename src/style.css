@@ -154,3 +154,46 @@ body {
 #progreso-descarga { width: 100%; margin-top: .6em; }
 .modelo-card.destacada { outline: 2px solid #ffcc29; }
 .modelo-card .disponible { color: #7fd18b; }
+
+/* Sesión 39: controles HTML dibujados sobre la cámara durante WebXR. */
+.xr-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0.5em;
+  padding: max(1em, env(safe-area-inset-top)) max(1em, env(safe-area-inset-right))
+    max(1em, env(safe-area-inset-bottom)) max(1em, env(safe-area-inset-left));
+  color: #fff;
+  pointer-events: auto;
+  touch-action: none;
+}
+.xr-overlay[hidden] { display: none; }
+.xr-overlay p {
+  max-width: min(42em, 100%);
+  margin: 0;
+  padding: 0.55em 0.75em;
+  border-radius: 8px;
+  background: rgb(11 18 32 / 78%);
+  text-shadow: 0 1px 2px #000;
+}
+.xr-overlay .xr-datos {
+  max-width: min(58em, 100%);
+  font-size: 0.72em;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+.xr-overlay button {
+  padding: 0.65em 0.9em;
+  border: 1px solid #d7e2f2;
+  border-radius: 8px;
+  background: rgb(11 18 32 / 88%);
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+.xr-overlay button[hidden] { display: none; }

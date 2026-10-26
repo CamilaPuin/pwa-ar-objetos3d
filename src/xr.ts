@@ -1,8 +1,3 @@
-
-
-
-
-
 /** Resultado de preguntar «¿puedo usar AR aquí?». */
 export type SoporteAR = "disponible" | "contexto-inseguro" | "sin-webxr" | "sin-ar";
 
@@ -17,7 +12,6 @@ export async function diagnosticarAR(): Promise<{ estado: SoporteAR; lineas: str
   if (!navigator.xr) return { estado: "sin-webxr", lineas };
 
   try {
-    // Responde si el DISPOSITIVO puede abrir ese modo; no pide permiso ni abre nada.
     const ok = await navigator.xr.isSessionSupported("immersive-ar");
     lineas.push(`isSessionSupported("immersive-ar"): ${ok}`);
     return { estado: ok ? "disponible" : "sin-ar", lineas };
@@ -40,13 +34,51 @@ export function mensajeSoporteAR(estado: SoporteAR): string {
   }
 }
 
-export function pedirSesionAR(overlay: HTMLElement | null): Promise<XRSession> {
-  const opciones: XRSessionInit & { domOverlay?: { root: Element } } = {
-    requiredFeatures: ["local"], // el origen (0,0,0) es donde está el usuario al empezar
-    optionalFeatures: ["dom-overlay"], // si existe, el botón «Salir» se dibuja sobre la cámara
+export interface CapacidadesAR {
+  overlay: boolean;
+  hitTest: boolean;
+  anclas: boolean;
+}
+
+/**
+ * Pide hit-test como función requerida porque algunos dispositivos no devuelven
+ * impactos cuando se solicita como opcional. Si no está disponible, abre AR con
+ * las funciones opcionales y permite que el visor use sus planes de respaldo.
+ */
+export async function pedirSesionAR(overlay: HTMLElement | null): Promise<XRSession> {
+  const abrir = (requeridas: string[], opcionales: string[]) => {
+    const opciones: XRSessionInit & { domOverlay?: { root: Element } } = {
+      requiredFeatures: requeridas,
+      optionalFeatures: opcionales,
+    };
+    if (overlay) opciones.domOverlay = { root: overlay };
+    return navigator.xr!.requestSession("immersive-ar", opciones);
   };
-  if (overlay) opciones.domOverlay = { root: overlay };
-  return navigator.xr!.requestSession("immersive-ar", opciones);
+
+  try {
+    return await abrir(["local", "hit-test"], ["dom-overlay", "anchors"]);
+  } catch (error) {
+    const nombre = error instanceof Error ? error.name : "";
+    if (nombre !== "NotSupportedError") throw error;
+    return abrir(["local"], ["dom-overlay", "hit-test", "anchors"]);
+  }
+}
+
+/** Devuelve las funciones que la sesión concedió realmente. */
+export function capacidadesDe(sesion: XRSession): CapacidadesAR {
+  const sesionConFunciones = sesion as XRSession & { enabledFeatures?: string[] };
+  const concedidas = sesionConFunciones.enabledFeatures;
+  const tiene = (nombre: string, respaldo: boolean) =>
+    Array.isArray(concedidas) ? concedidas.includes(nombre) : respaldo;
+  const frameConAnclas = typeof XRFrame === "undefined" ? null : XRFrame.prototype as XRFrame & {
+    createAnchor?: (pose: XRRigidTransform, espacio: XRSpace) => Promise<XRAnchor>;
+  };
+
+  return {
+    overlay: Boolean(sesion.domOverlayState),
+    hitTest: tiene("hit-test", typeof sesion.requestHitTestSource === "function"),
+    anclas: tiene("anchors", Boolean(frameConAnclas?.createAnchor)),
+  };
 }
 
 export function describirErrorAR(err: unknown): string {

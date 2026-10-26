@@ -27,7 +27,7 @@
         <pre id="diag-ar" class="diag-ar-texto"></pre>
         <button type="button" id="btn-recomprobar">Comprobar de nuevo</button>
       </details>
-      <p class="aviso-demo">Visor de prueba: un cubo, no un modelo real. Con la cámara de fondo NO es realidad aumentada: el cubo solo se dibuja encima del video. El botón «Ver en AR» abre una sesión WebXR real, pero el cubo aún no se apoya en ninguna superficie.</p>
+      <p class="aviso-demo">Visor de prueba: un cubo, no un modelo real. Con la cámara de fondo NO es realidad aumentada: el cubo solo se dibuja encima del video. En AR, busca superficies horizontales para apoyarlo; puedes moverlo, girarlo, cambiar su tamaño o quitarlo.</p>
     </section>
     <section class="descargas-zona" aria-labelledby="titulo-descargas">
       <h2 id="titulo-descargas">Uso sin conexión</h2>
@@ -39,8 +39,10 @@
       <progress id="progreso-descarga" max="3" value="0" hidden></progress>
       <p id="estado-descarga" class="estado-descarga" role="status"></p>
     </section>
-    <div id="xr-overlay" class="xr-overlay">
+    <div id="xr-overlay" class="xr-overlay" hidden>
       <p id="xr-estado">Sesión de realidad aumentada activa</p>
+      <p id="xr-datos" class="xr-datos"></p>
+      <button type="button" id="btn-quitar-cubo" hidden>Quitar cubo</button>
       <button type="button" id="btn-salir-ar">Salir de AR</button>
     </div>
     <div id="app"></div>
