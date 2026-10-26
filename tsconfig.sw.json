@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "lib": ["ES2020", "WebWorker"],
-    "types": []
+    "types": ["vite/client"]
   },
   "include": ["src/sw.ts", "src/db.ts", "src/descargas.ts"],
   "exclude": []

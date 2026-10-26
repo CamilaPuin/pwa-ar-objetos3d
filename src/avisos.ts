@@ -14,14 +14,14 @@ export async function pedirPermisoAvisos(): Promise<EstadoAvisos> {
 }
 
 /** Muestra una notificación a través del Service Worker (funciona también en Android). */
-export async function mostrarAviso(titulo: string, cuerpo: string, url = "/", tag = "atlas-aviso"): Promise<boolean> {
+export async function mostrarAviso(titulo: string, cuerpo: string, url = import.meta.env.BASE_URL, tag = "atlas-aviso"): Promise<boolean> {
   if (estadoAvisos() !== "granted") return false;
   const reg = await navigator.serviceWorker.ready;
   await reg.showNotification(titulo, {
     body: cuerpo,
-    icon: "/iconos/icon-192.png",
+    icon: `${import.meta.env.BASE_URL}iconos/icon-192.png`,
     tag,
-    data: { url },
+    data: { url: url === "/" ? import.meta.env.BASE_URL : url },
   });
   return true;
 }

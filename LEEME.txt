@@ -28,6 +28,18 @@ Cómo probarlo
      el evento a mano.
   3. Apaga el servidor (Ctrl+C), recarga: la app y las fichas siguen ahí.
 
+Publicar en GitHub Pages
+------------------------
+  1. Sube estos cambios a la rama main de GitHub.
+  2. En GitHub, abre Settings → Pages y selecciona «GitHub Actions» como
+     método de publicación.
+  3. El workflow .github/workflows/deploy.yml construirá y publicará la app.
+     Cuando termine, la URL será:
+     https://camilapuin.github.io/pwa-ar-objetos3d/
+
+No se necesita un archivo .env: este proyecto no usa claves ni variables
+secretas. El workflow configura la ruta base de GitHub Pages durante el build.
+
 Limitaciones honestas
 ----------------------
   - Es notificación LOCAL: no hay push desde un servidor (el Atlas no tiene
